@@ -142,13 +142,15 @@ export function Container({
     ? { type: "spring" as const, ...reducedMotionSpring }
     : { bounce, type: "spring" as const, visualDuration };
 
-  // Measure the inner wrapper's natural height when open
+  // Measure the inner wrapper's natural height continuously to prevent mid-animation retarget
   useLayoutEffect(() => {
-    if (open && measureRef.current) {
+    if (measureRef.current) {
       const height = measureRef.current.offsetHeight;
-      setMeasuredHeight(height);
+      if (height !== measuredHeight && height > 0) {
+        setMeasuredHeight(height);
+      }
     }
-  }, [open]);
+  });
 
   // Capture open state at pointerdown, before Base UI can change it
   const wasOpenRef = useRef(false);
@@ -205,7 +207,7 @@ export function Container({
             ? "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
             : "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
           height: open ? measuredHeight : buttonHeight,
-          scale: activeSubmenu ? 0.96 : 1,
+          scale: submenuStylesActive ? 0.96 : 1,
           width: open ? menuWidth : buttonWidth,
           x: open ? openOffset.x : 0,
           y: open ? openOffset.y : 0,
@@ -219,10 +221,8 @@ export function Container({
           ...positionStyles,
           cursor: open ? "default" : "pointer",
           overflow: open && submenuStylesActive ? "visible" : "hidden",
-          // Scale from center when submenu is active (and during exit animation)
-          transformOrigin: submenuStylesActive
-            ? "center center"
-            : transformOrigin,
+          // Keep stable transformOrigin to prevent jerk when submenu opens
+          transformOrigin,
           willChange: "transform",
           zIndex: open ? 50 : "auto",
           ...style,

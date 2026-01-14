@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { useDropdownContext } from "./context";
 import type { DropdownContentProps } from "./types";
@@ -26,6 +26,16 @@ export function Content({
     visualDuration,
     bounce,
   } = useDropdownContext();
+
+  // Track if animation is complete for pointer events
+  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+
+  // Reset animation state when dropdown closes
+  useEffect(() => {
+    if (!open) {
+      setIsAnimationComplete(false);
+    }
+  }, [open]);
 
   const prefersReducedMotion = useReducedMotion();
 
@@ -60,6 +70,7 @@ export function Content({
         ? "blur(0px)"
         : `blur(${animationConfig.contentBlur}px)`,
       opacity: 0,
+      pointerEvents: "none" as const,
       scale: 0.95,
       transition: {
         duration: 0.2,
@@ -69,6 +80,7 @@ export function Content({
     },
     hidden: {
       opacity: 0,
+      pointerEvents: "none" as const,
       scale: 0.95,
       ...hiddenOffset,
       filter: prefersReducedMotion
@@ -78,6 +90,7 @@ export function Content({
     visible: {
       filter: "blur(0px)",
       opacity: 1,
+      pointerEvents: "auto" as const,
       scale: 1,
       transition: {
         ...springConfig,
@@ -97,8 +110,11 @@ export function Content({
 
   const handleAnimationComplete = useCallback(
     (definition: string) => {
-      if (definition === "visible" && isOpenAnimationCompleteRef) {
-        isOpenAnimationCompleteRef.current = true;
+      if (definition === "visible") {
+        if (isOpenAnimationCompleteRef) {
+          isOpenAnimationCompleteRef.current = true;
+        }
+        setIsAnimationComplete(true);
       }
       onAnimationComplete?.();
     },
@@ -117,7 +133,11 @@ export function Content({
           onAnimationComplete={handleAnimationComplete}
           ref={setRef}
           role="menu"
-          style={{ position: "relative", ...style }}
+          style={{
+            pointerEvents: isAnimationComplete ? "auto" : "none",
+            position: "relative",
+            ...style,
+          }}
           transition={{
             ...springConfig,
             delay: prefersReducedMotion ? 0 : animationConfig.contentDelay,

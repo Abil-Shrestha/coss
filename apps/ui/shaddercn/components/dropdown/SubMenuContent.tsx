@@ -36,7 +36,7 @@ export function SubMenuContent({
   const prefersReducedMotion = useReducedMotion();
   const subMenuRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
-  const [isPresent, _safeToRemove] = usePresence();
+  const [isPresent, safeToRemove] = usePresence();
 
   // Trigger measurements
   const [triggerTop, setTriggerTop] = useState(0);
@@ -47,22 +47,19 @@ export function SubMenuContent({
 
   const isActive = activeSubmenu === id;
 
-  // Measure trigger dimensions when submenu opens
+  // Measure all dimensions in a single layout pass to prevent mid-animation retarget
   useLayoutEffect(() => {
-    if (isActive && triggerRef.current) {
-      setTriggerTop(triggerRef.current.offsetTop);
-      setTriggerHeight(triggerRef.current.offsetHeight);
-    }
-  }, [isActive, triggerRef]);
+    if (!isActive || !triggerRef.current || !measureRef.current) return;
 
-  // Measure content height (spacer + items)
-  useLayoutEffect(() => {
-    if (isActive && measureRef.current) {
-      // Force a slight delay to ensure DOM is fully rendered
-      const height = measureRef.current.offsetHeight;
-      setContentHeight(height);
-    }
-  }, [isActive]);
+    const nextTriggerTop = triggerRef.current.offsetTop;
+    const nextTriggerHeight = triggerRef.current.offsetHeight;
+    const nextContentHeight = measureRef.current.offsetHeight;
+
+    // Batch updates in one render
+    setTriggerTop(nextTriggerTop);
+    setTriggerHeight(nextTriggerHeight);
+    setContentHeight(nextContentHeight);
+  }, [isActive, triggerRef]);
 
   // Track exit state with presence API
   useEffect(() => {
@@ -118,6 +115,14 @@ export function SubMenuContent({
     ? { type: "spring" as const, ...reducedMotionSpring }
     : { bounce, type: "spring" as const, visualDuration };
 
+  // Clear exitingSubmenuId when the exit animation completes
+  const handleAnimationComplete = () => {
+    if (!isPresent) {
+      setExitingSubmenuId(null);
+      safeToRemove?.();
+    }
+  };
+
   const contentSpringConfig = prefersReducedMotion
     ? { type: "spring" as const, ...reducedMotionSpring }
     : {
@@ -147,9 +152,6 @@ export function SubMenuContent({
     },
   };
 
-  // Scale to pop forward to 1.06 visual (Container is at 0.96, so 0.96 * 1.104 ≈ 1.06)
-  const openScale = 1.06 / 0.96; // ≈ 1.104
-
   return (
     <AnimatePresence>
       {isActive && (
@@ -159,7 +161,6 @@ export function SubMenuContent({
             height: contentHeight,
             opacity: 1,
             pointerEvents: "auto" as const,
-            scale: openScale,
           }}
           className={className}
           exit={{
@@ -169,7 +170,6 @@ export function SubMenuContent({
             height: triggerHeight,
             opacity: 0,
             pointerEvents: "none" as const,
-            scale: 1,
           }}
           initial={{
             filter: prefersReducedMotion
@@ -178,8 +178,8 @@ export function SubMenuContent({
             height: triggerHeight,
             opacity: 1,
             pointerEvents: "auto" as const,
-            scale: 1,
           }}
+          onAnimationComplete={handleAnimationComplete}
           ref={subMenuRef}
           style={{
             ...style,

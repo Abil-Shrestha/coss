@@ -3,7 +3,7 @@ import "./globals.css";
 import { fontHeading, fontMono, fontSans } from "@shaddercn/ui/fonts";
 import { ThemeProvider } from "@shaddercn/ui/shared/theme-provider";
 import type { Metadata } from "next";
-
+import { ReactScan } from "@/components/react-scan";
 import { SiteHeader } from "@/components/site-header";
 import {
   AnchoredToastProvider,
@@ -38,6 +38,7 @@ export default function RootLayout({
                   className="before:-left-3 after:-right-3 container pointer-events-none absolute inset-0 z-45 before:absolute before:inset-y-0 before:w-px before:bg-border/64 after:absolute after:inset-y-0 after:w-px after:bg-border/64"
                 />
                 <SiteHeader />
+                <ReactScan />
                 {children}
               </div>
             </AnchoredToastProvider>

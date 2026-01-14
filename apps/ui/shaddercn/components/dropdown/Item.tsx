@@ -29,10 +29,11 @@ export function Item({
       // If inside a submenu, first close submenu, then close menu with delay
       if (isInsideActiveSubmenu) {
         setActiveSubmenu(null);
-        // Delay closing the main menu to allow submenu exit animation
+        // Let the submenu exit animation complete before closing the main menu
+        const submenuExitDelayMs = visualDuration * 1000 * 1.1;
         setTimeout(() => {
           setOpen(false);
-        }, visualDuration * 500); // Half the animation duration
+        }, submenuExitDelayMs);
       } else {
         setOpen(false);
       }

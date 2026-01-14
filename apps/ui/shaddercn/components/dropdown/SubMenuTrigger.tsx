@@ -36,9 +36,6 @@ export function SubMenuTrigger({
     ? { type: "spring" as const, ...reducedMotionSpring }
     : { bounce, type: "spring" as const, visualDuration };
 
-  // Scale to pop forward to 1.06 visual (Container is at 0.96, so 0.96 * 1.104 ≈ 1.06)
-  const openScale = 1.06 / 0.96; // ≈ 1.104
-
   // Toggle submenu on click
   const handleClick = useCallback(
     (event: React.MouseEvent) => {
@@ -60,7 +57,7 @@ export function SubMenuTrigger({
   return (
     <motion.div
       animate={{
-        scale: isActive ? openScale : 1,
+        scale: 1,
       }}
       aria-disabled={disabled || undefined}
       aria-expanded={isActive}
