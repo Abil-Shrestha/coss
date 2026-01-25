@@ -53,9 +53,19 @@ function PaletteSlider({
   const handleChange = useCallback(
     (nextValue: number | number[]) => {
       const normalized = Array.isArray(nextValue) ? nextValue : [nextValue];
-      onChange(
-        Array.isArray(value) ? (normalized as [number, number]) : normalized[0],
-      );
+      if (Array.isArray(value)) {
+        const [start, end] = normalized as number[];
+        if (start === undefined || end === undefined) {
+          return;
+        }
+        onChange([start, end]);
+        return;
+      }
+      const next = normalized[0];
+      if (next === undefined) {
+        return;
+      }
+      onChange(next);
     },
     [onChange, value],
   );
@@ -63,9 +73,19 @@ function PaletteSlider({
   const handleCommit = useCallback(
     (nextValue: number | number[]) => {
       const normalized = Array.isArray(nextValue) ? nextValue : [nextValue];
-      onCommit(
-        Array.isArray(value) ? (normalized as [number, number]) : normalized[0],
-      );
+      if (Array.isArray(value)) {
+        const [start, end] = normalized as number[];
+        if (start === undefined || end === undefined) {
+          return;
+        }
+        onCommit([start, end]);
+        return;
+      }
+      const next = normalized[0];
+      if (next === undefined) {
+        return;
+      }
+      onCommit(next);
     },
     [onCommit, value],
   );
