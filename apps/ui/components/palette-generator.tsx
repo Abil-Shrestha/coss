@@ -54,7 +54,7 @@ function PaletteSlider({
     (nextValue: number | number[]) => {
       const normalized = Array.isArray(nextValue) ? nextValue : [nextValue];
       if (Array.isArray(value)) {
-        const [start, end] = normalized as number[];
+        const [start, end] = normalized;
         if (start === undefined || end === undefined) {
           return;
         }
@@ -74,7 +74,7 @@ function PaletteSlider({
     (nextValue: number | number[]) => {
       const normalized = Array.isArray(nextValue) ? nextValue : [nextValue];
       if (Array.isArray(value)) {
-        const [start, end] = normalized as number[];
+        const [start, end] = normalized;
         if (start === undefined || end === undefined) {
           return;
         }
@@ -99,8 +99,7 @@ function PaletteSlider({
         onValueChange={handleChange}
         onValueCommitted={handleCommit}
         step={step}
-        thumbAlignment="edge"
-        value={value}
+        value={values}
       >
         <SliderPrimitive.Control className="w-full">
           <SliderPrimitive.Track className="h-7 w-full grow overflow-hidden rounded-md bg-foreground/5 group-has-[:focus-visible]:outline group-has-[:focus-visible]:outline-2 group-has-[:focus-visible]:outline-[#FDFF79] group-has-[:focus-visible]:outline-offset-2 dark:bg-white/5">
@@ -131,15 +130,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
     setDraftConfig(config);
   }, [config]);
 
-  const commitConfig = useCallback(
+  const updateConfig = useCallback(
     (updater: (prev: PaletteConfig) => PaletteConfig) => {
-      setDraftConfig((prev) => {
-        const next = updater(prev);
-        onCommit(next);
-        return next;
-      });
+      const next = updater(config);
+      setDraftConfig(next);
+      onCommit(next);
     },
-    [onCommit],
+    [config, onCommit],
   );
 
   return (
@@ -177,13 +174,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={100}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   saturation: value as number,
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   saturation: value as number,
                 }))
@@ -206,13 +203,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={360}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   hueRange: value as [number, number],
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   hueRange: value as [number, number],
                 }))
@@ -235,13 +232,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={100}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   luminanceRange: value as [number, number],
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   luminanceRange: value as [number, number],
                 }))
