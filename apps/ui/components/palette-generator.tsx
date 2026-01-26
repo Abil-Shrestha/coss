@@ -130,15 +130,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
     setDraftConfig(config);
   }, [config]);
 
-  const commitConfig = useCallback(
+  const updateConfig = useCallback(
     (updater: (prev: PaletteConfig) => PaletteConfig) => {
-      setDraftConfig((prev) => {
-        const next = updater(prev);
-        onCommit(next);
-        return next;
-      });
+      const next = updater(config);
+      setDraftConfig(next);
+      onCommit(next);
     },
-    [onCommit],
+    [config, onCommit],
   );
 
   return (
@@ -176,13 +174,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={100}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   saturation: value as number,
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   saturation: value as number,
                 }))
@@ -205,13 +203,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={360}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   hueRange: value as [number, number],
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   hueRange: value as [number, number],
                 }))
@@ -234,13 +232,13 @@ function PaletteControls({ config, onCommit, onReset }: PaletteControlsProps) {
               max={100}
               min={0}
               onChange={(value) =>
-                setDraftConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   luminanceRange: value as [number, number],
                 }))
               }
               onCommit={(value) =>
-                commitConfig((prev) => ({
+                updateConfig((prev) => ({
                   ...prev,
                   luminanceRange: value as [number, number],
                 }))
